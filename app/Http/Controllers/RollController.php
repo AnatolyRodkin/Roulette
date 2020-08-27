@@ -41,14 +41,14 @@ class RollController extends Controller
     }
 
     public function index(){
-        $allow_roll_time = 15; //время с момента последней прокрутки, через которое пользователь может крутить рулетку
+        $allow_roll_time = 60; //время (в секундах) с момента последней прокрутки, через которое пользователь может крутить рулетку
         $name = (string)$_REQUEST['name']; //получаем имя пользователя, который нажал на кнопку ROLL (не уверен на счет безопасности данного способа)
         $diff = $this->timeCheck($name);
         if($diff > $allow_roll_time) //проверяем, прошло ли заданное время с момента последнего roll'а
         $this->roll($name); //если да
         else
         {
-            $tmp = ($allow_roll_time + 1) - $diff; //считаем, сколько осталось времени до след roll'а
+            $tmp = $allow_roll_time - $diff; //считаем, сколько осталось времени до след roll'а
             echo 'Wait a little bit ( '.$tmp.'s )'; //если нет
         }
     }
@@ -61,6 +61,6 @@ class RollController extends Controller
         $diff = $last->diff($current_time); //разница м/у последним roll'ом и временем сейчас
         $diff_s = (int)$last->diffInSeconds($current_time); //то же, что и выше, но в секундах (int)
         $diff_format = $diff->format('%h:%I:%s'); //что и выше, отформатировано
-        return $diff_s;
+        return $diff_s; //
     }
 }
