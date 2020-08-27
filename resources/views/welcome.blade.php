@@ -61,14 +61,6 @@
             .m-b-md {
                 margin-bottom: 30px;
             }
-
-            .active {
-
-            }
-
-            .incative {
-
-            }
         </style>
         <script src="http://code.jquery.com/jquery-latest.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
@@ -95,7 +87,7 @@
                 </div>
                 @auth
                 <div class="m-b-sm" id="result">
-                    Now you can roll
+                    Try to roll!
                 </div>
 
                 <div class="mt-3">
@@ -122,36 +114,22 @@
   return xmlhttp;
 }
 
-// javascript-код голосования из примера
+
 function roll() {
-	// (1) создать объект для запроса к серверу
 	var req = getXmlHttp()
-    
     var str = '@auth{{Auth::user()->name}}@endauth'
-
 	req.onreadystatechange = function() {  
-        // onreadystatechange активируется при получении ответа сервера
-
 		if (req.readyState == 4) { 
             // если запрос закончил выполняться
-
 			if(req.status == 200) { 
                  // если статус 200 (ОК) - выдать ответ пользователю
                  $( "#result" ).text(req.responseText);
                  $( "#button" ).prop('disabled', false);
 			}
-			// тут можно добавить else с обработкой ошибок запроса
 		}
-
 	}
 
-       // (3) задать адрес подключения
 	req.open('GET', '/roll?name='+str, true);
-
-	// объект запроса подготовлен: указан адрес и создана функция onreadystatechange
-	// для обработки ответа сервера
-	 
-        // (4)
 	req.send();  // отослать запрос
     $( "#button" ).prop('disabled', true);
 }
