@@ -12,47 +12,55 @@ class RollController extends Controller
 
 
     public function saveResult($name, $money_amount){
-        $user = User::all()->where('name', $name)->first();
-        $win = new Winning;
-        $win->user_id = $user->id;
-        $win->money = $money_amount;
-        $win->save();
-        echo 'You are win '.$money_amount.' rub';
+        $user = User::all()->where('name', $name)->first(); //пользователь с именем name
+        $win = new Winning; //экземпляр модели выигрышей
+        $win->user_id = $user->id; //задаем айди пользователя для новой записи в таблице выигрышей
+        $win->money = $money_amount; //задаем количество выигранных за roll денег
+        $win->save(); //добавляем запись в таблицу
+        echo 'You are win '.$money_amount.' rub'; //выводим клиенту результат
     }
 
     public function roll($name){
         // $tmp = rand(1,3);
-        $tmp = 1;
-        $money_amount = 0;
+        $tmp = 1; //1 - выпадут деньги, 2 - выпадут бонусы, 3 - выпадет физ. вещь
+        $money_amount = 0; //количество денег (расчитывается дальше)
+        //ниже в каждом кейсе пишется логика выигрыша разных видов призов
         switch ($tmp) {
-            case 1:
+            case 1: //логика выигрыша денег
                 $money_amount = rand(50,1000);
                 break;
-            case 2:
-                echo "i равно 1";
-                break;
-            case 3:
+            case 2: //логика выигрыша бонусов (не описана)
                 echo "i равно 2";
                 break;
+            case 3: //логика выигрыша физ. вещи (не описана)
+                echo "i равно 3";
+                break;
         }
-        $this->saveResult($name, $money_amount);
+        $this->saveResult($name, $money_amount); //вызов функции сохранения результата roll'а
         return;
     }
 
     public function index(){
-        $name = (string)$_REQUEST['name'];
-        if($this->timeCheck($name))
-        $this->roll($name);
+        $allow_roll_time = 15; //время с момента последней прокрутки, через которое пользователь может крутить рулетку
+        $name = (string)$_REQUEST['name']; //получаем имя пользователя, который нажал на кнопку ROLL (не уверен на счет безопасности данного способа)
+        $diff = $this->timeCheck($name);
+        if($diff > $allow_roll_time) //проверяем, прошло ли заданное время с момента последнего roll'а
+        $this->roll($name); //если да
+        else
+        {
+            $tmp = ($allow_roll_time + 1) - $diff; //считаем, сколько осталось времени до след roll'а
+            echo 'Wait a little bit ( '.$tmp.'s )'; //если нет
+        }
     }
 
     public function timeCheck($name){
-        $user = User::all()->where('name', $name)->first();
-        $id = $user->id;
-        $current = Carbon::now();
-        $last_win = Winning::all()->where('user_id', $id)->last();
-        $last = new Carbon($last_win->created_at);
-        $result = $last->diff($current)->format('%h:%I:%s');
-        echo $result;
-        return true;
+        $user = User::all()->where('name', $name)->first(); //пользователь с именем name
+        $current_time = Carbon::now(); //текущее время
+        $last_win = Winning::all()->where('user_id', $user->id)->last(); //последний выигрыш
+        $last = new Carbon($last_win->created_at); //время и дата последнего выигрыша
+        $diff = $last->diff($current_time); //разница м/у последним roll'ом и временем сейчас
+        $diff_s = (int)$last->diffInSeconds($current_time); //то же, что и выше, но в секундах (int)
+        $diff_format = $diff->format('%h:%I:%s'); //что и выше, отформатировано
+        return $diff_s;
     }
 }
